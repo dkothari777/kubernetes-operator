@@ -1,4 +1,4 @@
-# Jenkins Operator
+# Jenkins Operator FORKED
 
 [![Version](https://img.shields.io/badge/version-v0.7.0-brightgreen.svg)](https://github.com/jenkinsci/kubernetes-operator/releases/tag/v0.7.0)
 [![Build status](https://github.com/jenkinsci/kubernetes-operator/actions/workflows/auto-tests.yaml/badge.svg)](https://github.com/jenkinsci/kubernetes-operator/actions/workflows/auto-tests.yaml)
@@ -12,7 +12,24 @@
 The Jenkins Operator is a [Kubernetes Native Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) which manages operations for Jenkins on Kubernetes.
 It has been built with Immutability and declarative Configuration as Code in mind.
 
-
+## Make sure you set tracking and you rebase updates to your branch
+```shell
+$ git remote add track git@github.com:jenkinsci/kubernetes-operator.git
+$ git fetch --all
+$ git branch --track track_original track/master
+$ git checkout track/master
+$ git pull -r
+$ git checkout master 
+$ git rebase track_original
+```
+## To build Container locally
+```shell
+$ make go-dependencies
+$ make container-runtime-build-amd64
+$ docker tag <container_tag_name> <your-docker-repo>
+$ docker push <your-docker-repo> 
+```
+> https://jenkinsci.github.io/kubernetes-operator/docs/developer-guide/
 ## Preliminaries
 
 Considering that this Operator is created for managing instances for Jenkins,
