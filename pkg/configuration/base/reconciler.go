@@ -106,7 +106,15 @@ func (r *JenkinsBaseConfigurationReconciler) Reconcile() (reconcile.Result, jenk
 
 	ok, err := r.verifyPlugins(jenkinsClient)
 	if err != nil {
-		return reconcile.Result{}, nil, err
+	    jenkinsClient, err := r.Configuration.GetJenkinsClientFromSecret()
+        if err != nil {
+            return reconcile.Result{}, nil, err
+        }
+	    ok, err = r.verifyPlugins(jenkinsClient)
+	    if err != nil {
+		    return reconcile.Result{}, nil, err
+	    }
+	    jenkinsClient, err = r.Configuration.GetJenkinsClient()
 	}
 	if !ok {
 		//TODO add what plugins have been changed

@@ -94,7 +94,15 @@ func (r *reconcileUserConfiguration) ensureCasc(jenkinsClient jenkinsclient.Jenk
 	configurationAsCodeClient := casc.New(jenkinsClient, r.Client, r.Configuration.Jenkins)
 	requeue, err := configurationAsCodeClient.Ensure(r.Configuration.Jenkins)
 	if err != nil {
-		return reconcile.Result{}, err
+	        jenkinsApiClient, err := r.Configuration.GetJenkinsClientFromSecret()
+            if err != nil {
+                return reconcile.Result{}, err
+            }
+            configurationAsCodeClient = casc.New(jenkinsApiClient, r.Client, r.Configuration.Jenkins)
+            requeue, err = configurationAsCodeClient.Ensure(r.Configuration.Jenkins)
+            if err != nil {
+                return reconcile.Result{}, err
+            }
 	}
 	if requeue {
 		return reconcile.Result{Requeue: true}, nil
@@ -103,7 +111,15 @@ func (r *reconcileUserConfiguration) ensureCasc(jenkinsClient jenkinsclient.Jenk
 	groovyClient := groovy.New(jenkinsClient, r.Client, r.Configuration.Jenkins, "user-groovy", r.Configuration.Jenkins.Spec.GroovyScripts.Customization)
 	requeue, err = groovyClient.WaitForSecretSynchronization(resources.GroovyScriptsSecretVolumePath)
 	if err != nil {
-		return reconcile.Result{}, err
+        jenkinsApiClient, err := r.Configuration.GetJenkinsClientFromSecret()
+        if err != nil {
+            return reconcile.Result{}, err
+        }
+        groovyClient := groovy.New(jenkinsApiClient, r.Client, r.Configuration.Jenkins, "user-groovy", r.Configuration.Jenkins.Spec.GroovyScripts.Customization)
+        requeue, err = groovyClient.WaitForSecretSynchronization(resources.GroovyScriptsSecretVolumePath)
+        if err != nil {
+            return reconcile.Result{}, err
+        }
 	}
 	if requeue {
 		return reconcile.Result{Requeue: true}, nil

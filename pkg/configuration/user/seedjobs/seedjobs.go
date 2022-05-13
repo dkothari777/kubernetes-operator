@@ -193,7 +193,11 @@ func (s *seedJobs) EnsureSeedJobs(jenkins *v1alpha2.Jenkins) (done bool, err err
 	}
 
 	if len(jenkins.Spec.SeedJobs) > 0 {
-		err := s.createAgent(s.jenkinsClient, s.Client, jenkins, jenkins.Namespace, AgentName)
+	    jenkinsClient, errr := s.Configuration.GetJenkinsClientFromSecret()
+	    if errr != nil {
+	        return false, err
+	    }
+		err := s.createAgent(jenkinsClient, s.Client, jenkins, jenkins.Namespace, AgentName)
 		if err != nil {
 			return false, err
 		}
@@ -259,7 +263,11 @@ func (s *seedJobs) waitForSeedJobAgent(agentName string) (requeue bool, err erro
 
 // createJob is responsible for creating jenkins job which configures jenkins seed jobs and deploy keys
 func (s *seedJobs) createJobs(jenkins *v1alpha2.Jenkins) (requeue bool, err error) {
-	groovyClient := groovy.New(s.jenkinsClient, s.Client, jenkins, "seed-jobs", jenkins.Spec.GroovyScripts.Customization)
+    jenkinsClient, errr := s.Configuration.GetJenkinsClientFromSecret()
+    if errr != nil {
+        return false, err
+    }
+	groovyClient := groovy.New(jenkinsClient, s.Client, jenkins, "seed-jobs", jenkins.Spec.GroovyScripts.Customization)
 	for _, seedJob := range jenkins.Spec.SeedJobs {
 		credentialValue, err := s.credentialValue(jenkins.Namespace, seedJob)
 		if err != nil {
